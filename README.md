@@ -33,11 +33,5 @@ Frontend (HTML/CSS/JavaScript):
 • Real-time communication with backend
 • Mobile-friendly interface
 
-## 📁 Project Structure:
-puzzle_game/
-├── app.py           # Main Flask application
-├── run_game.py      # Easy startup script
-├── requirements.txt # Dependencies
-├── README.md        # Documentation
-└── templates/
-    └── index.html   # Game interface
+![Screenshot 2025-06-19 at 3 59 56 PM](https://github.com/user-attachments/assets/2f41f667-6532-4b98-a7e5-af44916239f2)
+![Screenshot 2025-06-19 at 4 00 17 PM](https://github.com/user-attachments/assets/65d6e9ec-ee0d-4331-a813-66b281edec08)
