@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Puzzle Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-controls {
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .puzzle-container {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .puzzle-grid {
+            display: grid;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .puzzle-tile {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puzzle-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .puzzle-tile.empty {
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .puzzle-tile.empty:hover {
+            transform: none;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .moves-counter {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            text-align: center;
+        }
+
+        .size-selector {
+            margin: 20px 0;
+        }
+
+        .size-selector label {
+            margin-right: 15px;
+            font-size: 16px;
+        }
+
+        .size-selector select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .size-selector select option {
+            background: #333;
+            color: white;
+        }
+
+        @media (max-width: 600px) {
+            .puzzle-tile {
+                font-size: 18px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                margin: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 Sliding Puzzle</h1>
+        <p class="subtitle">Arrange the numbers in order from 1 to complete the puzzle!</p>
+        
+        <div class="game-controls">
+            <div class="size-selector">
+                <label for="puzzle-size">Puzzle Size:</label>
+                <select id="puzzle-size">
+                    <option value="3">3x3 (Easy)</option>
+                    <option value="4">4x4 (Medium)</option>
+                    <option value="5">5x5 (Hard)</option>
+                </select>
+            </div>
+            <button class="btn" onclick="newGame()">New Game</button>
+            <button class="btn" onclick="shufflePuzzle()">Shuffle</button>
+        </div>
+
+        <div class="puzzle-container">
+            <div id="puzzle-grid" class="puzzle-grid"></div>
+            <div class="game-info">
+                <div class="moves-counter">Moves: <span id="move-count">0</span></div>
+                <div id="game-status">Click tiles to move them!</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-message" class="win-message">
+        🎉 Congratulations! 🎉<br>
+        You solved the puzzle!<br>
+        <button class="btn" onclick="hideWinMessage(); newGame();" style="margin-top: 15px;">Play Again</button>
+    </div>
+
+    <script>
+        let moveCount = 0;
+        let currentSize = 3;
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGameState();
+        });
+
+        async function newGame() {
+            const size = document.getElementById('puzzle-size').value;
+            currentSize = parseInt(size);
+            
+            try {
+                const response = await fetch('/api/new_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ size: currentSize })
+                });
+                
+                const data = await response.json();
+                updatePuzzleDisplay(data);
+                moveCount = 0;
+                updateMoveCount();
+                hideWinMessage();
+                updateGameStatus('Click tiles to move them!');
+            } catch (error) {
+                console.error('Error starting new game:', error);
+            }
+        }
+
+        async function shufflePuzzle() {
+            await newGame(); // Shuffling is done when creating a new game
+        }
+
+        async function loadGameState() {
+            try {
+                const response = await fetch('/api/state');
+                const data = await response.json();
+                currentSize = data.size;
+                document.getElementById('puzzle-size').value = currentSize;
+                updatePuzzleDisplay(data);
+            } catch (error) {
+                console.error('Error loading game state:', error);
+            }
+        }
+
+        async function moveTile(row, col) {
+            try {
+                const response = await fetch('/api/move', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ row: row, col: col })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePuzzleDisplay(data.board_state);
+                    moveCount++;
+                    updateMoveCount();
+                    
+                    if (data.board_state.is_solved) {
+                        showWinMessage();
+                    }
+                } else {
+                    // Visual feedback for invalid move
+                    const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    tile.style.background = '#ff6b6b';
+                    setTimeout(() => {
+                        tile.style.background = 'linear-gradient(145deg, #ffffff, #e6e6e6)';
+                    }, 200);
+                }
+            } catch (error) {
+                console.error('Error moving tile:', error);
+            }
+        }
+
+        function updatePuzzleDisplay(gameState) {
+            const grid = document.getElementById('puzzle-grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${gameState.size}, 1fr)`;
+            
+            // Calculate tile size based on container and grid size
+            const containerWidth = Math.min(400, window.innerWidth - 100);
+            const tileSize = Math.floor((containerWidth - 40) / gameState.size);
+            
+            for (let i = 0; i < gameState.size; i++) {
+                for (let j = 0; j < gameState.size; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'puzzle-tile';
+                    tile.style.width = `${tileSize}px`;
+                    tile.style.height = `${tileSize}px`;
+                    tile.setAttribute('data-row', i);
+                    tile.setAttribute('data-col', j);
+                    
+                    const value = gameState.board[i][j];
+                    if (value === 0) {
+                        tile.classList.add('empty');
+                        tile.textContent = '';
+                    } else {
+                        tile.textContent = value;
+                        tile.addEventListener('click', () => moveTile(i, j));
+                    }
+                    
+                    grid.appendChild(tile);
+                }
+            }
+        }
+
+        function updateMoveCount() {
+            document.getElementById('move-count').textContent = moveCount;
+        }
+
+        function updateGameStatus(message) {
+            document.getElementById('game-status').textContent = message;
+        }
+
+        function showWinMessage() {
+            document.getElementById('win-message').style.display = 'block';
+            updateGameStatus(`Solved in ${moveCount} moves!`);
+        }
+
+        function hideWinMessage() {
+            document.getElementById('win-message').style.display = 'none';
+        }
+
+        // Handle puzzle size change
+        document.getElementById('puzzle-size').addEventListener('change', function() {
+            newGame();
+        });
+    </script>
+</body>
+</html>
